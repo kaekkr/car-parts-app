@@ -1,5 +1,24 @@
-# Vue 3 + TypeScript + Vite
+# Car Parts SPA
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Это одностраничное приложение (SPA) на базе Vue 3 + TypeScript + BootstrapVue 3.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Основной функционал
+
+- Иерархический просмотр автомобильных деталей (Кузов, Двигатель и т.д.)
+- Динамический расчет цен деталей на основе дочерних элементов
+- Добавление и удаление деталей в реальном времени
+- Экспорт всей таблицы в Excel (.xlsx)
+- Экспорт всей таблицы в PDF (.pdf)
+
+## Технологии
+
+- Vite + Vue 3 + TypeScript
+- BootstrapVue 3
+- xlsx для экспорта в Excel
+- jsPDF и jsPDF-AutoTable для экспорта в PDF
+
+## Как запустить локально
+
+```bash
+pnpm/npm/yarn install
+pnpm/npm/yarn run dev
