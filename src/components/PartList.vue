@@ -48,38 +48,11 @@ import { ref } from 'vue'
 import * as XLSX from 'xlsx'
 import type { Part } from '../types/Part'
 import PartItem from './PartItem.vue'
+import { usePartsStore } from '../stores/partsStore';
+import { storeToRefs } from 'pinia';
 
-const parts = ref<Part[]>([
-      {
-        id: 1,
-        name: 'Body',
-        price: 0, 
-        quantity: 1,
-        children: [
-          {
-            id: 11,
-            name: 'Door',
-            price: 0,
-            quantity: 3,
-            children: [
-              { id: 111, name: 'Lock', price: 5000, quantity: 4 },
-              { id: 112, name: 'Handle', price: 6000, quantity: 6 }
-            ]
-          }
-        ]
-      },
-      {
-        id: 2,
-        name: 'Engine',
-        price: 0,
-        quantity: 1,
-        children: [
-          { id: 21, name: 'Piston', price: 10000, quantity: 5 },
-          { id: 22, name: 'Ring', price: 2000, quantity: 3 }
-        ]
-      }
-]);
-
+const partsStore = usePartsStore();
+const { parts } = storeToRefs(partsStore);
 const showModal = ref(false);
 const newPartName = ref('');
 const newPartPrice = ref<number>(0);
