@@ -15,9 +15,10 @@
       :part="part"
       @delete="handleDelete"
       @add-child="handleAddChild"
+      @edit="handleEdit"
     />
 
-    <b-modal v-model="showModal" title="Добавить новую деталь" hide-footer>
+    <b-modal v-model="showModal" :title="isEditing ? 'Редактировать деталь' : 'Добавить новую деталь'" hide-footer>
       <b-form @submit.prevent="saveNewPart">
         <b-form-group label="Название детали:" label-for="part-name">
           <b-form-input id="part-name" v-model="newPartName" required />
@@ -44,12 +45,12 @@
 import * as FileSaver from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import * as XLSX from 'xlsx'
+import { usePartsStore } from '../stores/partsStore'
 import type { Part } from '../types/Part'
 import PartItem from './PartItem.vue'
-import { usePartsStore } from '../stores/partsStore';
-import { storeToRefs } from 'pinia';
 
 const partsStore = usePartsStore();
 const { parts } = storeToRefs(partsStore);
@@ -58,6 +59,8 @@ const newPartName = ref('');
 const newPartPrice = ref<number>(0);
 const newPartQuantity = ref<number>(1);
 const currentParentId = ref<number | null>(null);
+const editingPart = ref<Part | null>(null);
+const isEditing = ref(false);
 
 const exportToExcel = () => {
   const data = flattenParts(parts.value);
@@ -130,6 +133,7 @@ const calculatePricePerOne = (part: Part): number => {
 };
 
 const handleAddChild = (parentId: number) => {
+  isEditing.value = false;
   currentParentId.value = parentId;
   newPartName.value = '';
   newPartPrice.value = 0;
@@ -137,36 +141,53 @@ const handleAddChild = (parentId: number) => {
   showModal.value = true;
 };
 
-const saveNewPart = () => {
-  if (!currentParentId.value) return;
-
-  const newPart: Part = {
-  	id: Date.now(),
-  	name: newPartName.value || 'Без имени',
-  	price: Number(newPartPrice.value), 
-  	quantity: Number(newPartQuantity.value),
-  	children: []
-	};
-
-  const addRecursive = (partsList: Part[]) => {
-    for (const part of partsList) {
-      if (part.id === currentParentId.value) {
-        if (!part.children) {
-          part.children = [];
-        }
-        part.children.push(newPart);
-        return true;
-      }
-      if (part.children && addRecursive(part.children)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  addRecursive(parts.value);
-  showModal.value = false;
+const handleEdit = (part: Part) => {
+  isEditing.value = true;
+  editingPart.value = part;
+  newPartName.value = part.name;
+  newPartPrice.value = part.price;
+  newPartQuantity.value = part.quantity;
+  showModal.value = true;
 };
+
+
+
+const saveNewPart = () => {
+  if (isEditing.value && editingPart.value) {
+    editingPart.value.name = newPartName.value;
+    editingPart.value.price = Number(newPartPrice.value);
+    editingPart.value.quantity = Number(newPartQuantity.value);
+  } else if (currentParentId.value) {
+    const newPart: Part = {
+      id: Date.now(),
+      name: newPartName.value || 'Без имени',
+      price: Number(newPartPrice.value),
+      quantity: Number(newPartQuantity.value),
+      children: []
+    };
+
+    const addRecursive = (partsList: Part[]) => {
+      for (const part of partsList) {
+        if (part.id === currentParentId.value) {
+          part.children = part.children || [];
+          part.children.push(newPart);
+          return true;
+        }
+        if (part.children && addRecursive(part.children)) return true;
+      }
+      return false;
+    };
+
+    addRecursive(parts.value);
+  }
+
+  showModal.value = false;
+  isEditing.value = false;
+  editingPart.value = null;
+  currentParentId.value = null;
+};
+
+
 
 
 const handleDelete = (id: number) => {

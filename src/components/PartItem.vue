@@ -5,7 +5,8 @@
       <p>Цена за 1 шт: {{ calculatedPrice }} | Количество: {{ part.quantity }} | Стоимость: {{ calculatedPrice * part.quantity }}</p>
       
       <button class="btn btn-sm btn-danger me-2" @click="deletePart">Удалить</button>
-      <button class="btn btn-sm btn-primary" @click="addChild">Добавить дочернюю деталь</button>
+      <button class="btn btn-sm btn-primary me-2" @click="addChild">Добавить дочернюю деталь</button>
+      <b-button class='btn btn-sm' variant="warning" @click="edit">Редактировать</b-button>
 
       <div v-if="part.children">
         <PartItem 
@@ -14,6 +15,7 @@
           :part="child" 
 					@delete="emit('delete', $event)"
   				@add-child="emit('add-child', $event)"
+          @edit="emit('edit', $event)"
         />
       </div>
     </div>
@@ -32,7 +34,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'delete', id: number): void;
   (e: 'add-child', id: number): void;
-}>();
+  (e: 'edit', part: Part): void;
+}>(); 
 
 const calculatePricePerOne = (part: Part): number => {
   if (part.children && part.children.length > 0) {
@@ -56,5 +59,9 @@ const deletePart = () => {
 const addChild = () => {
   emit('add-child', props.part.id);
 };
+
+const edit = () => {
+  emit('edit', props.part);
+}
 </script>
 
